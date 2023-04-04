@@ -22,11 +22,15 @@ The extension provides three different views which you cycle through by clicking
 
 KS Code Stats keeps track of two things:
 
-- number of *keystrokes*
-- number of *characters* added or removed with each keystroke
+- number of _keystrokes_
+- number of _characters_ added or removed with each keystroke
 
 When a keystroke results in multiple characters being added to the document, your efficiency stats increase. When a keystroke removes characters—such as when pressing **Delete**—your efficiency stats decrease.
 
 ## Contact me
 
-To report bugs or suggest new features, contact me at schultkr@amazon.com.
+Report bugs or request new features by [submitting issues on Github](https://github.com/Krxtopher/vscode-ks-coding-stats/issues).
+
+## License
+
+MIT-0
