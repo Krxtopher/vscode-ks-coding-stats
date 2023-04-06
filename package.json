@@ -1,7 +1,7 @@
 {
   "name": "ks-coding-stats",
   "displayName": "KS Coding Stats",
-  "description": "Measure your coding efficiency in VS Code!",
+  "description": "Measure your coding efficiency",
   "publisher": "Kris Schultz",
   "icon": "./images/icon.png",
   "repository": {
