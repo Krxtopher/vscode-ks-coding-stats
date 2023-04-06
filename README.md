@@ -1,4 +1,4 @@
-Use this extension to measure how much your coding productivity improves when using code assist features like IntelliSense and snippets as well as AI coding companions like Amazon CodeWhisperer and Github Copilot.
+Use this extension to measure how much your coding productivity improves when using code assist features like **IntelliSense** and **snippets** as well as AI coding companions like **Amazon CodeWhisperer** and **GitHub Copilot**.
 
 ## How to use
 
