@@ -25,7 +25,7 @@ The extension provides three different views which you cycle through by clicking
 - number of _keystrokes_
 - number of _characters_ added or removed with each keystroke
 
-When a keystroke results in multiple characters being added to the document, your efficiency stats increase. When a keystroke removes characters—such as when pressing **Delete**—your efficiency stats decrease.
+When a keystroke results in multiple characters being added to the document, your efficiency stats improve. When a keystroke removes characters—such as when pressing **Delete**—your efficiency stats decline.
 
 ## Contact me
 
