@@ -1,15 +1,24 @@
 import * as vscode from "vscode";
 
+/**
+ * Called when the extension is activated.
+ */
 export function activate(context: vscode.ExtensionContext) {
   console.debug("KS Coding Stats: activated");
   let contentChangeTracker = new StatsTracker(context);
   context.subscriptions.push(contentChangeTracker);
 }
 
+/**
+ * Called when the extension is deactivated.
+ */
 export function deactivate() {
   console.debug("KS Coding Stats: deactivated");
 }
 
+/**
+ * StatsTracker implements all logic for this extension.
+ */
 class StatsTracker implements vscode.Disposable {
   private globalState: vscode.Memento;
   private static modeCount = 3;
@@ -20,6 +29,9 @@ class StatsTracker implements vscode.Disposable {
 
   private activeDocumentUri: vscode.Uri | undefined;
 
+  /**
+   * The number of keystrokes detected.
+   */
   get keyCount(): number {
     if (!this.activeDocumentUri) return 0;
     return this.globalState.get(
@@ -36,6 +48,9 @@ class StatsTracker implements vscode.Disposable {
     );
   }
 
+  /**
+   * The net number of characters produced.
+   */
   get charCount(): number {
     if (!this.activeDocumentUri) return 0;
     return this.globalState.get(
@@ -83,14 +98,14 @@ class StatsTracker implements vscode.Disposable {
 
     // Register a listener for active document changes.
     vscode.window.onDidChangeActiveTextEditor(
-      this.onDidChangeActiveTextEditor,
+      this.handleDidChangeActiveTextEditor,
       this,
       this.eventHandlers
     );
 
     // Register a listener for text document changes.
     vscode.workspace.onDidChangeTextDocument(
-      this.onDidChangeTextDocument,
+      this.handleDidChangeTextDocument,
       this,
       this.eventHandlers
     );
@@ -98,6 +113,9 @@ class StatsTracker implements vscode.Disposable {
     this.render();
   }
 
+  /**
+   * Updates the status bar visuals.
+   */
   render() {
     if (!this.activeDocumentUri) {
       this.statusBarItem.text = "";
@@ -166,13 +184,13 @@ class StatsTracker implements vscode.Disposable {
     this.render();
   }
 
-  onDidChangeActiveTextEditor(editor: vscode.TextEditor | undefined) {
+  handleDidChangeActiveTextEditor(editor: vscode.TextEditor | undefined) {
     this.activeDocumentUri = editor?.document.uri;
     console.debug(`active document: ${this.activeDocumentUri}`);
     this.render();
   }
 
-  onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+  handleDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
     if (
       this.activeDocumentUri !== event.document.uri ||
       event.contentChanges.length === 0
