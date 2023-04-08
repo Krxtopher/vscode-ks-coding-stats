@@ -15,6 +15,14 @@
   "categories": [
     "Other"
   ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ks-coding-stats.resetStats",
+        "title": "KS Coding Stats: Reset stats for file"
+      }
+    ]
+  },
   "activationEvents": [
     "onStartupFinished"
   ],

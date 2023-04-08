@@ -37,6 +37,14 @@ class StatsTracker implements vscode.Disposable {
     );
     this.eventHandlers.push(cycleStatusBarModeHandler);
 
+    // Register the "resetStats" command.
+    const resetStatsHandler = vscode.commands.registerCommand(
+      "ks-coding-stats.resetStats",
+      this.resetStats,
+      this
+    );
+    this.eventHandlers.push(resetStatsHandler);
+
     // Register a listener for active document changes.
     vscode.window.onDidChangeActiveTextEditor(
       this.onDidChangeActiveTextEditor,
@@ -51,7 +59,6 @@ class StatsTracker implements vscode.Disposable {
       this.eventHandlers
     );
 
-    // Update the status bar item.
     this.displayStats();
   }
 
@@ -140,6 +147,12 @@ class StatsTracker implements vscode.Disposable {
 
   cycleStatusBarMode() {
     this.modeIndex = (this.modeIndex + 1) % StatsTracker.modeCount;
+    this.displayStats();
+  }
+
+  resetStats() {
+    this.keyCounts.clear();
+    this.characterCounts.clear();
     this.displayStats();
   }
 
