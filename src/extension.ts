@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 export function activate(context: vscode.ExtensionContext) {
   console.debug("KS Coding Stats: activated");
-  let contentChangeTracker = new StatsTracker();
+  let contentChangeTracker = new StatsTracker(context);
   context.subscriptions.push(contentChangeTracker);
 }
 
@@ -11,15 +11,51 @@ export function deactivate() {
 }
 
 class StatsTracker implements vscode.Disposable {
+  private globalState: vscode.Memento;
   private static modeCount = 3;
   private modeIndex = 0;
 
   private statusBarItem: vscode.StatusBarItem;
   private eventHandlers: vscode.Disposable[] = [];
-  private keyCounts: Map<vscode.Uri, number> = new Map();
-  private characterCounts: Map<vscode.Uri, number> = new Map();
 
-  constructor() {
+  private activeDocumentUri: vscode.Uri | undefined;
+
+  get keyCount(): number {
+    if (!this.activeDocumentUri) return 0;
+    return this.globalState.get(
+      `${this.activeDocumentUri.toString()}-keyCount`,
+      0
+    );
+  }
+
+  set keyCount(value: number) {
+    if (!this.activeDocumentUri) return;
+    this.globalState.update(
+      `${this.activeDocumentUri.toString()}-keyCount`,
+      value
+    );
+  }
+
+  get charCount(): number {
+    if (!this.activeDocumentUri) return 0;
+    return this.globalState.get(
+      `${this.activeDocumentUri.toString()}-charCount`,
+      0
+    );
+  }
+
+  set charCount(value: number) {
+    if (!this.activeDocumentUri) return;
+    this.globalState.update(
+      `${this.activeDocumentUri.toString()}-charCount`,
+      value
+    );
+  }
+
+  constructor(context: vscode.ExtensionContext) {
+    this.globalState = context.globalState;
+    this.activeDocumentUri = vscode.window.activeTextEditor?.document.uri;
+
     // Create a new stats bar item.
     this.statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right
@@ -59,10 +95,15 @@ class StatsTracker implements vscode.Disposable {
       this.eventHandlers
     );
 
-    this.displayStats();
+    this.render();
   }
 
-  displayStats() {
+  render() {
+    if (!this.activeDocumentUri) {
+      this.statusBarItem.text = "";
+      return;
+    }
+
     switch (this.modeIndex) {
       case 0:
         this.displayXFactorStats();
@@ -77,18 +118,7 @@ class StatsTracker implements vscode.Disposable {
   }
 
   displayXFactorStats() {
-    const activeTextEditorDocumentUri =
-      vscode.window.activeTextEditor?.document.uri;
-
-    if (!activeTextEditorDocumentUri) {
-      this.statusBarItem.text = "";
-      return;
-    }
-
-    const keyCount = this.keyCounts.get(activeTextEditorDocumentUri) || 0;
-    const characterCount =
-      this.characterCounts.get(activeTextEditorDocumentUri) || 0;
-    const boostMultiplier = characterCount / keyCount;
+    const boostMultiplier = this.charCount / this.keyCount;
 
     // Update the status bar
     if (isNaN(boostMultiplier)) {
@@ -102,37 +132,17 @@ class StatsTracker implements vscode.Disposable {
   }
 
   displayCharsPerKeyStats() {
-    const activeTextEditorDocumentUri =
-      vscode.window.activeTextEditor?.document.uri;
-
-    if (!activeTextEditorDocumentUri) {
-      return;
-    }
-
-    const keyCount = this.keyCounts.get(activeTextEditorDocumentUri) || 0;
-    const characterCount =
-      this.characterCounts.get(activeTextEditorDocumentUri) || 0;
-
     // Update the status bar
-    this.statusBarItem.text = `${characterCount} chars | ${keyCount} keystrokes`;
+    this.statusBarItem.text = `${this.charCount} chars | ${this.keyCount} keystrokes`;
 
     // Show the status bar
     this.statusBarItem.show();
   }
 
   displayTypingReductionStats() {
-    const activeTextEditorDocumentUri =
-      vscode.window.activeTextEditor?.document.uri;
-
-    if (!activeTextEditorDocumentUri) {
-      this.statusBarItem.text = "";
-      return;
-    }
-
-    const keyCount = this.keyCounts.get(activeTextEditorDocumentUri) || 0;
-    const characterCount =
-      this.characterCounts.get(activeTextEditorDocumentUri) || 0;
-    const typingReduction = Math.round((1 - keyCount / characterCount) * 100);
+    const typingReduction = Math.round(
+      (1 - this.keyCount / this.charCount) * 100
+    );
     if (isNaN(typingReduction)) {
       this.statusBarItem.text = "-- typing reduction";
     } else if (!isFinite(typingReduction)) {
@@ -147,42 +157,35 @@ class StatsTracker implements vscode.Disposable {
 
   cycleStatusBarMode() {
     this.modeIndex = (this.modeIndex + 1) % StatsTracker.modeCount;
-    this.displayStats();
+    this.render();
   }
 
   resetStats() {
-    this.keyCounts.clear();
-    this.characterCounts.clear();
-    this.displayStats();
+    this.keyCount = 0;
+    this.charCount = 0;
+    this.render();
   }
 
   onDidChangeActiveTextEditor(editor: vscode.TextEditor | undefined) {
-    this.displayStats();
+    this.activeDocumentUri = editor?.document.uri;
+    console.debug(`active document: ${this.activeDocumentUri}`);
+    this.render();
   }
 
   onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
-    const activeTextEditorDocumentUri =
-      vscode.window.activeTextEditor?.document.uri;
-
     if (
-      activeTextEditorDocumentUri !== event.document.uri ||
+      this.activeDocumentUri !== event.document.uri ||
       event.contentChanges.length === 0
     ) {
       return;
     }
 
-    // Update the key count
-    let keyCount = this.keyCounts.get(event.document.uri) || 0;
-    keyCount++;
-    this.keyCounts.set(event.document.uri, keyCount);
+    this.keyCount += 1;
 
-    // Update the character count
-    let characterCount = this.characterCounts.get(event.document.uri) || 0;
     const deleteCount = event.contentChanges[0].rangeLength;
-    characterCount += event.contentChanges[0].text.length - deleteCount;
-    this.characterCounts.set(event.document.uri, characterCount);
+    this.charCount += event.contentChanges[0].text.length - deleteCount;
 
-    this.displayStats();
+    this.render();
   }
 
   dispose() {
