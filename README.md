@@ -1,8 +1,10 @@
 Use this extension to measure how much your coding productivity improves when using code assist features like **IntelliSense** and **snippets** as well as AI coding companions like **Amazon CodeWhisperer** and **GitHub Copilot**.
 
+https://user-images.githubusercontent.com/1727699/230802342-9c064402-48b2-418f-bf7d-a9524af7e755.mp4
+
 ## Installation
 
-Download the [latest release](https://github.com/Krxtopher/vscode-ks-coding-stats/releases) from GitHub.
+Download the .vsix file from the [latest release](https://github.com/Krxtopher/vscode-ks-coding-stats/releases) from GitHub.
 
 Install the .vsix file you downloaded by opening the Extensions panel in VS Code an selecting the option to "Install from VSIX..."
 
