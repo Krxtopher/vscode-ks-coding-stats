@@ -1,5 +1,13 @@
 Use this extension to measure how much your coding productivity improves when using code assist features like **IntelliSense** and **snippets** as well as AI coding companions like **Amazon CodeWhisperer** and **GitHub Copilot**.
 
+## Installation
+
+Download the [latest release](https://github.com/Krxtopher/vscode-ks-coding-stats/releases) from GitHub.
+
+Install the .vsix file you downloaded by opening the Extensions panel in VS Code an selecting the option to "Install from VSIX..."
+
+![Install from VSIX](./doc-images/vsix-install.png)
+
 ## How to use
 
 As you type, stats about your coding efficiency will be displayed in the status bar at the bottom of the VS Code window. Stats reflect the file you are currently editing.
@@ -14,7 +22,7 @@ The extension provides three different views which you cycle through by clicking
 
 ![85% typing reduction](./doc-images/typing-reduction.png)
 
-**Average characters per keystroke**
+**Characters & keystrokes**
 
 ![709 chara | 106 keystrokes](./doc-images/chars-per-key.png)
 
