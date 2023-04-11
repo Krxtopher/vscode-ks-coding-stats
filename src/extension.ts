@@ -4,7 +4,7 @@ import * as vscode from "vscode";
  * Called when the extension is activated.
  */
 export function activate(context: vscode.ExtensionContext) {
-  console.debug("KS Coding Stats: activated");
+  console.debug("KS Coding Stats: activated 1");
   let contentChangeTracker = new StatsTracker(context);
   context.subscriptions.push(contentChangeTracker);
 }
@@ -33,7 +33,9 @@ class StatsTracker implements vscode.Disposable {
    * The number of keystrokes detected.
    */
   get keyCount(): number {
-    if (!this.activeDocumentUri) return 0;
+    if (!this.activeDocumentUri) {
+      return 0;
+    }
     return this.globalState.get(
       `${this.activeDocumentUri.toString()}-keyCount`,
       0
@@ -41,7 +43,9 @@ class StatsTracker implements vscode.Disposable {
   }
 
   set keyCount(value: number) {
-    if (!this.activeDocumentUri) return;
+    if (!this.activeDocumentUri) {
+      return;
+    }
     this.globalState.update(
       `${this.activeDocumentUri.toString()}-keyCount`,
       value
@@ -52,7 +56,9 @@ class StatsTracker implements vscode.Disposable {
    * The net number of characters produced.
    */
   get charCount(): number {
-    if (!this.activeDocumentUri) return 0;
+    if (!this.activeDocumentUri) {
+      return 0;
+    }
     return this.globalState.get(
       `${this.activeDocumentUri.toString()}-charCount`,
       0
@@ -60,7 +66,9 @@ class StatsTracker implements vscode.Disposable {
   }
 
   set charCount(value: number) {
-    if (!this.activeDocumentUri) return;
+    if (!this.activeDocumentUri) {
+      return;
+    }
     this.globalState.update(
       `${this.activeDocumentUri.toString()}-charCount`,
       value
@@ -76,9 +84,9 @@ class StatsTracker implements vscode.Disposable {
       vscode.StatusBarAlignment.Right
     );
 
-    // Set the status bar command.
     this.statusBarItem.command = "ks-coding-stats.cycleStatusBarMode";
     this.statusBarItem.tooltip = "Click to cycle through stats";
+    this.statusBarItem.show();
 
     // Register the "statusBarClick" command.
     const cycleStatusBarModeHandler = vscode.commands.registerCommand(
@@ -144,33 +152,29 @@ class StatsTracker implements vscode.Disposable {
     } else {
       this.statusBarItem.text = `${boostMultiplier.toFixed(1)}x coding boost`;
     }
-
-    // Show the status bar
-    this.statusBarItem.show();
   }
 
   displayCharsPerKeyStats() {
     // Update the status bar
     this.statusBarItem.text = `${this.charCount} chars | ${this.keyCount} keystrokes`;
-
-    // Show the status bar
-    this.statusBarItem.show();
   }
 
   displayTypingReductionStats() {
-    const typingReduction = Math.round(
-      (1 - this.keyCount / this.charCount) * 100
-    );
-    if (isNaN(typingReduction)) {
-      this.statusBarItem.text = "-- typing reduction";
-    } else if (!isFinite(typingReduction)) {
-      this.statusBarItem.text = "-∞ typing reduction";
-    } else {
-      this.statusBarItem.text = `${typingReduction}% typing reduction`;
+    if (this.charCount === 0) {
+      this.statusBarItem.text = "0% typing reduction";
+      return;
     }
 
-    // Show the status bar
-    this.statusBarItem.show();
+    const typingReduction = 1 - this.keyCount / this.charCount;
+
+    if (typingReduction < 0) {
+      const increasePercent = Math.round((1 - typingReduction - 1) * 100);
+      this.statusBarItem.text = `⚠ -${increasePercent}% typing reduction`;
+      return;
+    }
+
+    const decreasePercent = Math.round(typingReduction * 100);
+    this.statusBarItem.text = `${decreasePercent}% reduction`;
   }
 
   cycleStatusBarMode() {
