@@ -2,13 +2,13 @@
   "name": "ks-coding-stats",
   "displayName": "KS Coding Stats",
   "description": "Measure your coding efficiency",
-  "publisher": "Kris Schultz",
+  "publisher": "KrisSchultz",
   "icon": "./images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/Krxtopher/vscode-ks-coding-stats"
   },
-  "version": "0.9.1",
+  "version": "0.9.2",
   "engines": {
     "vscode": "^1.77.0"
   },
